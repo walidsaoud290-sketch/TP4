@@ -1,0 +1,73 @@
+name: TP4
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dependances
+        run: pip install -r requirements.txt
+
+      - name: Installer flake8
+        run: pip install flake8
+
+      - name: Lancer flake8
+        run: flake8 .
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Recuperer code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer dependances
+        run: pip install -r requirements.txt
+
+      - name: Lancer les tests
+        run: pytest
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Recuperer code
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer outil build
+        run: pip install build
+
+      - name: Generer package
+        run: python -m build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-package
+          path: dist/
